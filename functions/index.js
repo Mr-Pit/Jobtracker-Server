@@ -24,10 +24,10 @@ const config = {
 const firebase = require("firebase")
 firebase.initializeApp(config)
 
+const db = admin.firestore()
+
 app.get("/jobs", (req, res) => {
-  admin
-    .firestore()
-    .collection("jobs")
+  db.collection("jobs")
     .orderBy("createdAt", "desc")
     .get()
     .then(data => {
@@ -52,9 +52,7 @@ app.post("/job", (req, res) => {
     body: req.body.body,
     createdAt: new Date().toISOString()
   }
-  admin
-    .firestore()
-    .collection("jobs")
+  db.collection("jobs")
     .add(newJob)
     .then(doc => {
       res.json({ message: `document ${doc.id} created successfully` })
@@ -65,6 +63,41 @@ app.post("/job", (req, res) => {
     })
 })
 
-app.post("/signup", (req, res) => {})
+app.post("/signup", (req, res) => {
+  const newUser = {
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword
+  }
+
+  let token, userId
+  firebase
+    .auth()
+    .createUserWithEmailAndPassword(newUser.email, newUser.password)
+    .then(data => {
+      userId = data.user.uid
+      return data.user.getIdToken()
+    })
+    .then(idToken => {
+      token = idToken
+      const userCredentials = {
+        email: newUser.email,
+        createdAt: new Date().toISOString(),
+        userId
+      }
+      return db.doc(`/users/${userId}`).set(userCredentials)
+    })
+    .then(() => {
+      return res.status(201).json({ token })
+    })
+    .catch(err => {
+      console.error(err)
+      if (err.code === "auth/email-already-in-use") {
+        return res.status(400).json({ email: `email is already in use` })
+      } else {
+        return res.status(500).json({ error: err.code })
+      }
+    })
+})
 
 exports.api = functions.https.onRequest(app)
