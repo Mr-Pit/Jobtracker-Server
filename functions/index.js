@@ -35,7 +35,10 @@ app.get("/jobs", (req, res) => {
       data.forEach(doc => {
         jobs.push({
           jobId: doc.id,
-          body: doc.data().body,
+          company: doc.data().company,
+          position: doc.data().position,
+          status: doc.data().status,
+          link: doc.data().link,
           createdAt: doc.data().createdAt
         })
       })
@@ -44,21 +47,54 @@ app.get("/jobs", (req, res) => {
     .catch(err => console.error(err))
 })
 
-app.post("/job", (req, res) => {
-  if (req.method !== "POST") {
-    return res.status(400).json({ error: "Method not allowed" })
+const FBAuth = (req, res, next) => {
+  let idToken
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
+    idToken = req.headers.authorization.split("Bearer ")[1]
+  } else {
+    console.error("No token found")
+    return res.status(403).json({ error: "Unauthorized" })
   }
+  admin
+    .auth()
+    .verifyIdToken(idToken)
+    .then(decodedToken => {
+      req.user = decodedToken
+      console.log(decodedToken)
+      return next()
+    })
+    .catch(err => {
+      console.error("Error while verifying token", err)
+      return res.status(403).json(err)
+    })
+}
+
+app.post("/job", FBAuth, (req, res) => {
   const newJob = {
-    body: req.body.body,
+    userId: req.user.uid,
+    company: req.body.company,
+    position: req.body.position,
+    status: req.body.status,
+    link: req.body.link,
     createdAt: new Date().toISOString()
   }
   db.collection("jobs")
     .add(newJob)
     .then(doc => {
-      res.json({ message: `document ${doc.id} created successfully` })
+      res.json({
+        message: `document ${doc.id} created successfully`
+      })
     })
     .catch(err => {
-      res.status(500).json({ error: "something went wrong" })
+      if (err.code === "auth/argument-error") {
+        res.status(500).json({ error: "Invalid token" })
+        console.error(err)
+      }
+      // need to catch error for bad tokens
+      res.status(500).json({ error: "Something went wrong" })
       console.error(err)
     })
 })
@@ -121,6 +157,41 @@ app.post("/signup", (req, res) => {
       } else {
         return res.status(500).json({ error: err.code })
       }
+    })
+})
+
+app.post("/login", (req, res) => {
+  const user = {
+    email: req.body.email,
+    password: req.body.password
+  }
+  let errors = {}
+
+  if (isEmpty(user.email)) {
+    errors.email = "Must not be empty"
+  } else if (!isEmail(user.email)) {
+    errors.email = "Must be a valid email"
+  }
+  if (isEmpty(user.password)) errors.password = "Must not be empty"
+  if (Object.keys(errors).length > 0) return res.status(400).json(errors)
+
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(user.email, user.password)
+    .then(data => {
+      return data.user.getIdToken()
+    })
+    .then(token => {
+      return res.json({ token })
+    })
+    .catch(err => {
+      console.log(err)
+      if (err.code === "auth/wrong-password") {
+        return res
+          .status(403)
+          .json({ general: "wrong credentials please try again" })
+      }
+      return res.status(500).json({ error: err.code })
     })
 })
 
