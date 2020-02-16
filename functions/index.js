@@ -5,7 +5,12 @@ const app = require("express")()
 const FBAuth = require("./utility/fbAuth")
 
 const { getAllJobs, postOneJob } = require("./handlers/jobs")
-const { signup, login, uploadImage } = require("./handlers/users")
+const {
+  signup,
+  login,
+  uploadImage,
+  addUserDetails
+} = require("./handlers/users")
 
 // Initialize Firebase
 
@@ -16,5 +21,6 @@ app.post("/job", FBAuth, postOneJob)
 app.post("/signup", signup)
 app.post("/login", login)
 app.post("/user/image", FBAuth, uploadImage)
+app.post("/user", FBAuth, addUserDetails)
 
 exports.api = functions.https.onRequest(app)

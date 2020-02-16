@@ -7,7 +7,8 @@ firebase.initializeApp(config)
 
 const {
   validateSignupData,
-  validateLoginData
+  validateLoginData,
+  reduceUserDetails
 } = require("../utility/validators")
 
 exports.signup = (req, res) => {
@@ -95,6 +96,10 @@ exports.addUserDetails = (req, res) => {
       console.error(err)
       return res.status(500).json({ error: err.code })
     })
+}
+
+exports.addUserDetails = (req, res) => {
+  let userDetails = reduceUserDetails(req.body)
 }
 
 exports.uploadImage = (req, res) => {
