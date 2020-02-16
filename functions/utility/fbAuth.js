@@ -16,7 +16,6 @@ module.exports = (req, res, next) => {
     .verifyIdToken(idToken)
     .then(decodedToken => {
       req.user = decodedToken
-      console.log(decodedToken)
       return next()
     })
     .catch(err => {
