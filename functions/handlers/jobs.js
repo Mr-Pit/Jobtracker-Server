@@ -69,3 +69,19 @@ exports.deleteJob = (req, res) => {
       return res.status(500).json({ error: err.code })
     })
 }
+
+exports.getJob = (req, res) => {
+  let jobData = {}
+  db.doc(`jobs/${req.params.jobId}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        jobData.jobPostDetails = doc.data()
+        return res.json(jobData)
+      }
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+}
