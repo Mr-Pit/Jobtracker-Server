@@ -130,6 +130,20 @@ exports.getAuthenticatedUser = (req, res) => {
     })
 }
 
+// get all users details
+exports.getAllUsers = (req, res) => {
+  db.collection("users")
+    .get()
+    .then(data => {
+      let users = []
+      data.forEach(doc => {
+        users.push(doc.data())
+      })
+      return res.json(users)
+    })
+    .catch(err => console.error(err))
+}
+
 exports.uploadImage = (req, res) => {
   const BusBoy = require("busboy")
   const path = require("path")
