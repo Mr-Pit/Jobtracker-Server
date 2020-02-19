@@ -84,19 +84,6 @@ exports.login = (req, res) => {
       return res.status(500).json({ error: err.code })
     })
 }
-exports.addUserDetails = (req, res) => {
-  let userDetails = reduceUserDetails(req.body)
-
-  db.doc(`/users/${req.user.uid}`)
-    .update(userDetails)
-    .then(() => {
-      return res.json({ message: "Details added successfully" })
-    })
-    .catch(err => {
-      console.error(err)
-      return res.status(500).json({ error: err.code })
-    })
-}
 
 // user details
 exports.addUserDetails = (req, res) => {
@@ -120,9 +107,30 @@ exports.getAuthenticatedUser = (req, res) => {
     .get()
     .then(doc => {
       if (doc.exists) {
-        userData.credentials = doc.data()
-        return res.json(userData)
+        userData.user = doc.data()
+        return db
+          .collection("jobs")
+          .where("userId", "==", req.user.uid)
+          .orderBy("createdAt", "desc")
+          .get()
+      } else {
+        return res.status(404).json({ errror: "User not found" })
       }
+    })
+    .then(data => {
+      userData.jobs = []
+      data.forEach(doc => {
+        userData.jobs.push({
+          userId: doc.data().userId,
+          company: doc.data().company,
+          position: doc.data().position,
+          status: doc.data().status,
+          link: doc.data().link,
+          createdAt: doc.data().createdAt,
+          jobId: doc.id
+        })
+      })
+      return res.json(userData)
     })
     .catch(err => {
       console.error(err)
