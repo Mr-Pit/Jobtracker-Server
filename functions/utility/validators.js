@@ -9,18 +9,36 @@ const isEmpty = string => {
   else return false
 }
 
-exports.validateSignupData = data => {
+exports.validateSignUpData = data => {
   let errors = {}
+
   if (isEmpty(data.email)) {
     errors.email = "Must not be empty"
   } else if (!isEmail(data.email)) {
-    errors.email = "Must be a valid email"
+    errors.email = "Must be a valid email address"
   }
 
   if (isEmpty(data.password)) errors.password = "Must not be empty"
   if (data.password !== data.confirmPassword)
     errors.confirmPassword = "Passwords must match"
-
+  if (isEmpty(data.cohort)) errors.cohort = "Must not be empty"
+  if (typeof Number(data.cohort) !== "number")
+    errors.cohort = "Not a valid cohort"
+  if (Number(data.cohort) > 100 || Number(data.cohort) < 0) {
+    errors.cohort = "Not a valid cohort"
+  }
+  if (isEmpty(data.program)) errors.program = "Must not be empty"
+  // if (
+  //   (data.program !== 'full stack' && data.program.length) ||
+  //   (data.program !== 'uxui' && data.program.length)
+  // ) {
+  //   console.log(data.program)
+  //   errors.program = 'Not a valid program'
+  // }
+  if (!(data.program === "full stack" || data.program === "ux/ui")) {
+    errors.program = "Not a valid program"
+  }
+  // if (data.program !== 'ux/ui') errors.program = 'Not a valid program'
   return {
     errors,
     valid: Object.keys(errors).length === 0 ? true : false

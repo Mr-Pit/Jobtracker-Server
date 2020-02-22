@@ -6,7 +6,7 @@ const firebase = require("firebase")
 firebase.initializeApp(config)
 
 const {
-  validateSignupData,
+  validateSignUpData,
   validateLoginData,
   reduceUserDetails
 } = require("../utility/validators")
@@ -15,15 +15,15 @@ exports.signup = (req, res) => {
   const newUser = {
     email: req.body.email,
     password: req.body.password,
-    confirmPassword: req.body.confirmPassword
+    confirmPassword: req.body.confirmPassword,
+    cohort: req.body.cohort,
+    program: req.body.program
   }
 
-  const { valid, errors } = validateSignupData(newUser)
-
+  // Validate user data
+  const { valid, errors } = validateSignUpData(newUser)
   if (!valid) return res.status(400).json(errors)
-
-  const noImage = "no-img.png"
-
+  const noImg = "no-img.png"
   let token, userId
   firebase
     .auth()
@@ -37,7 +37,9 @@ exports.signup = (req, res) => {
       const userCredentials = {
         email: newUser.email,
         createdAt: new Date().toISOString(),
-        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImage}?alt=media`,
+        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
+        cohort: Number(newUser.cohort),
+        program: newUser.program,
         userId
       }
       return db.doc(`/users/${userId}`).set(userCredentials)
@@ -48,9 +50,9 @@ exports.signup = (req, res) => {
     .catch(err => {
       console.error(err)
       if (err.code === "auth/email-already-in-use") {
-        return res.status(400).json({ email: `email is already in use` })
+        return res.status(400).json({ email: "Email is already in use" })
       } else {
-        return res.status(500).json({ error: err.code })
+        return res.status(500).json({ error: error.code })
       }
     })
 }
@@ -81,7 +83,9 @@ exports.login = (req, res) => {
           .status(403)
           .json({ general: "wrong credentials please try again" })
       }
-      return res.status(500).json({ error: err.code })
+      return res
+        .status(403)
+        .json({ general: "wrong credentials please try again" })
     })
 }
 
@@ -206,4 +210,42 @@ exports.uploadImage = (req, res) => {
       })
   })
   busboy.end(req.rawBody)
+}
+
+// Get any user's details
+exports.getUserDetails = (req, res) => {
+  let userData = {}
+  db.doc(`/users/${req.params.userId}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        userData.user = doc.data()
+        return db
+          .collection("jobs")
+          .where("userId", "==", req.params.userId)
+          .orderBy("createdAt", "desc")
+          .get()
+      } else {
+        return res.status(404).json({ errror: "User not found" })
+      }
+    })
+    .then(data => {
+      userData.jobs = []
+      data.forEach(doc => {
+        userData.jobs.push({
+          userId: doc.data().userId,
+          company: doc.data().company,
+          position: doc.data().position,
+          status: doc.data().status,
+          link: doc.data().link,
+          createdAt: doc.data().createdAt,
+          jobId: doc.id
+        })
+      })
+      return res.json(userData)
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
 }

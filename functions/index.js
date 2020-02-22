@@ -11,7 +11,8 @@ const {
   uploadImage,
   addUserDetails,
   getAuthenticatedUser,
-  getAllUsers
+  getAllUsers,
+  getUserDetails
 } = require("./handlers/users")
 
 // Initialize Firebase
@@ -30,5 +31,6 @@ app.post("/user/image", FBAuth, uploadImage)
 app.post("/user", FBAuth, addUserDetails)
 app.get("/user", FBAuth, getAuthenticatedUser)
 app.get("/users", getAllUsers)
+app.get("/user/:userId", getUserDetails)
 
 exports.api = functions.https.onRequest(app)
