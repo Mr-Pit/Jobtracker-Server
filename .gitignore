@@ -65,3 +65,7 @@ node_modules/
 .env
 
 admin.json
+
+config.js
+
+

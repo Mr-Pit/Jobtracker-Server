@@ -8,11 +8,14 @@ firebase.initializeApp(config)
 const {
   validateSignUpData,
   validateLoginData,
-  reduceUserDetails
+  reduceUserDetails,
+  validateUserDetails
 } = require("../utility/validators")
 
 exports.signup = (req, res) => {
   const newUser = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
@@ -35,6 +38,8 @@ exports.signup = (req, res) => {
     .then(idToken => {
       token = idToken
       const userCredentials = {
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
         email: newUser.email,
         createdAt: new Date().toISOString(),
         imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
@@ -51,6 +56,10 @@ exports.signup = (req, res) => {
       console.error(err)
       if (err.code === "auth/email-already-in-use") {
         return res.status(400).json({ email: "Email is already in use" })
+      } else if (err.code === "auth/weak-password") {
+        return res
+          .status(400)
+          .json({ password: "Password must be 6 characters" })
       } else {
         return res.status(500).json({ error: error.code })
       }
@@ -93,6 +102,8 @@ exports.login = (req, res) => {
 exports.addUserDetails = (req, res) => {
   let userDetails = reduceUserDetails(req.body)
 
+  const { valid, errors } = validateUserDetails(userDetails)
+  if (!valid) return res.status(400).json(errors)
   db.doc(`/users/${req.user.uid}`)
     .update(userDetails)
     .then(() => {
