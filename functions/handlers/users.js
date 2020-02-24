@@ -1,8 +1,8 @@
-const { db, admin } = require("../utility/admin")
+const { db, admin } = require('../utility/admin')
 
-const config = require("../utility/config")
+const config = require('../utility/config')
 
-const firebase = require("firebase")
+const firebase = require('firebase')
 firebase.initializeApp(config)
 
 const {
@@ -10,7 +10,7 @@ const {
   validateLoginData,
   reduceUserDetails,
   validateUserDetails
-} = require("../utility/validators")
+} = require('../utility/validators')
 
 exports.signup = (req, res) => {
   const newUser = {
@@ -26,7 +26,7 @@ exports.signup = (req, res) => {
   // Validate user data
   const { valid, errors } = validateSignUpData(newUser)
   if (!valid) return res.status(400).json(errors)
-  const noImg = "no-img.png"
+  const noImg = 'no-img.png'
   let token, userId
   firebase
     .auth()
@@ -54,12 +54,12 @@ exports.signup = (req, res) => {
     })
     .catch(err => {
       console.error(err)
-      if (err.code === "auth/email-already-in-use") {
-        return res.status(400).json({ email: "Email is already in use" })
-      } else if (err.code === "auth/weak-password") {
+      if (err.code === 'auth/email-already-in-use') {
+        return res.status(400).json({ email: 'Email is already in use' })
+      } else if (err.code === 'auth/weak-password') {
         return res
           .status(400)
-          .json({ password: "Password must be 6 characters" })
+          .json({ password: 'Password must be 6 characters' })
       } else {
         return res.status(500).json({ error: error.code })
       }
@@ -87,27 +87,27 @@ exports.login = (req, res) => {
     })
     .catch(err => {
       console.log(err)
-      if (err.code === "auth/wrong-password") {
+      if (err.code === 'auth/wrong-password') {
         return res
           .status(403)
-          .json({ general: "wrong credentials please try again" })
+          .json({ general: 'wrong credentials please try again' })
       }
       return res
         .status(403)
-        .json({ general: "wrong credentials please try again" })
+        .json({ general: 'wrong credentials please try again' })
     })
 }
 
 // user details
 exports.addUserDetails = (req, res) => {
   let userDetails = reduceUserDetails(req.body)
-
+  console.log(typeof req.body.cohort)
   const { valid, errors } = validateUserDetails(userDetails)
   if (!valid) return res.status(400).json(errors)
   db.doc(`/users/${req.user.uid}`)
     .update(userDetails)
     .then(() => {
-      return res.json({ message: "Details added successfully" })
+      return res.json({ message: 'Details added successfully' })
     })
     .catch(err => {
       console.error(err)
@@ -124,12 +124,12 @@ exports.getAuthenticatedUser = (req, res) => {
       if (doc.exists) {
         userData.user = doc.data()
         return db
-          .collection("jobs")
-          .where("userId", "==", req.user.uid)
-          .orderBy("createdAt", "desc")
+          .collection('jobs')
+          .where('userId', '==', req.user.uid)
+          .orderBy('createdAt', 'desc')
           .get()
       } else {
-        return res.status(404).json({ errror: "User not found" })
+        return res.status(404).json({ errror: 'User not found' })
       }
     })
     .then(data => {
@@ -155,7 +155,7 @@ exports.getAuthenticatedUser = (req, res) => {
 
 // get all users details
 exports.getAllUsers = (req, res) => {
-  db.collection("users")
+  db.collection('users')
     .get()
     .then(data => {
       let users = []
@@ -168,26 +168,26 @@ exports.getAllUsers = (req, res) => {
 }
 
 exports.uploadImage = (req, res) => {
-  const BusBoy = require("busboy")
-  const path = require("path")
-  const os = require("os")
-  const fs = require("fs")
+  const BusBoy = require('busboy')
+  const path = require('path')
+  const os = require('os')
+  const fs = require('fs')
 
   const busboy = new BusBoy({ headers: req.headers })
 
   let imageToBeUploaded = {}
   let imageFileName
 
-  busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
-      return res.status(400).json({ error: "wrong file type submitted" })
+      return res.status(400).json({ error: 'wrong file type submitted' })
     }
     console.log(fieldname, file, filename, encoding, mimetype)
-    if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
-      return res.status(400).json({ error: "Wrong file type submitted" })
+    if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
+      return res.status(400).json({ error: 'Wrong file type submitted' })
     }
     // my.image.png => ['my', 'image', 'png']
-    const imageExtension = filename.split(".")[filename.split(".").length - 1]
+    const imageExtension = filename.split('.')[filename.split('.').length - 1]
     // 32756238461724837.png
     imageFileName = `${Math.round(
       Math.random() * 1000000000000
@@ -196,7 +196,7 @@ exports.uploadImage = (req, res) => {
     imageToBeUploaded = { filepath, mimetype }
     file.pipe(fs.createWriteStream(filepath))
   })
-  busboy.on("finish", () => {
+  busboy.on('finish', () => {
     admin
       .storage()
       .bucket(config.storageBucket)
@@ -213,11 +213,11 @@ exports.uploadImage = (req, res) => {
         return db.doc(`/users/${req.user.uid}`).update({ imageUrl })
       })
       .then(() => {
-        return res.json({ message: "image uploaded successfully" })
+        return res.json({ message: 'image uploaded successfully' })
       })
       .catch(err => {
         console.error(err)
-        return res.status(500).json({ error: "something went wrong" })
+        return res.status(500).json({ error: 'something went wrong' })
       })
   })
   busboy.end(req.rawBody)
@@ -232,12 +232,12 @@ exports.getUserDetails = (req, res) => {
       if (doc.exists) {
         userData.user = doc.data()
         return db
-          .collection("jobs")
-          .where("userId", "==", req.params.userId)
-          .orderBy("createdAt", "desc")
+          .collection('jobs')
+          .where('userId', '==', req.params.userId)
+          .orderBy('createdAt', 'desc')
           .get()
       } else {
-        return res.status(404).json({ errror: "User not found" })
+        return res.status(404).json({ errror: 'User not found' })
       }
     })
     .then(data => {

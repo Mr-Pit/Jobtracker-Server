@@ -5,7 +5,7 @@ const isEmail = email => {
 }
 
 const isEmpty = string => {
-  if (string.trim() === "") return true
+  if (string.trim() === '') return true
   else return false
 }
 
@@ -13,34 +13,34 @@ exports.validateSignUpData = data => {
   let errors = {}
 
   if (isEmpty(data.firstName)) {
-    errors.firstName = "Must not be empty"
+    errors.firstName = 'Must not be empty'
   }
 
   if (isEmpty(data.lastName)) {
-    errors.lastName = "Must not be empty"
+    errors.lastName = 'Must not be empty'
   }
 
   if (isEmpty(data.email)) {
-    errors.email = "Must not be empty"
+    errors.email = 'Must not be empty'
   } else if (!isEmail(data.email)) {
-    errors.email = "Must be a valid email address"
+    errors.email = 'Must be a valid email address'
   }
 
-  if (isEmpty(data.password)) errors.password = "Must not be empty"
+  if (isEmpty(data.password)) errors.password = 'Must not be empty'
   if (data.password !== data.confirmPassword)
-    errors.confirmPassword = "Passwords must match"
+    errors.confirmPassword = 'Passwords must match'
 
   // cohort validation
-  if (isEmpty(data.cohort)) errors.cohort = "Must not be empty"
-  if (data.cohort !== data.cohort.replace(/\D/g, ""))
-    errors.cohort = "Not a valid cohort"
+  if (isEmpty(data.cohort)) errors.cohort = 'Must not be empty'
+  if (data.cohort !== data.cohort.replace(/\D/g, ''))
+    errors.cohort = 'Not a valid cohort'
   if (Number(data.cohort) > 100 || Number(data.cohort) < 0) {
-    errors.cohort = "Not a valid cohort"
+    errors.cohort = 'Not a valid cohort'
   }
   // Program validation
-  if (isEmpty(data.program)) errors.program = "Must not be empty"
-  if (!(data.program === "full stack" || data.program === "ux/ui")) {
-    errors.program = "Not a valid program"
+  if (isEmpty(data.program)) errors.program = 'Must not be empty'
+  if (!(data.program === 'full stack' || data.program === 'ux/ui')) {
+    errors.program = 'Not a valid program'
   }
   return {
     errors,
@@ -52,11 +52,11 @@ exports.validateLoginData = data => {
   let errors = {}
 
   if (isEmpty(data.email)) {
-    errors.email = "Must not be empty"
+    errors.email = 'Must not be empty'
   } else if (!isEmail(data.email)) {
-    errors.email = "Must be a valid email"
+    errors.email = 'Must be a valid email'
   }
-  if (isEmpty(data.password)) errors.password = "Must not be empty"
+  if (isEmpty(data.password)) errors.password = 'Must not be empty'
   return {
     errors,
     valid: Object.keys(errors).length === 0 ? true : false
@@ -68,28 +68,28 @@ exports.reduceUserDetails = data => {
 
   if (data.linkedIn) {
     if (!isEmpty(data.linkedIn.trim())) {
-      if (data.linkedIn.trim().substring(0, 4) !== "http") {
+      if (data.linkedIn.trim().substring(0, 4) !== 'http') {
         userDetails.linkedIn = `http://${data.linkedIn.trim()}`
       } else userDetails.linkedIn = data.linkedIn
     }
   }
   if (data.github) {
     if (!isEmpty(data.github.trim())) {
-      if (data.github.trim().substring(0, 4) !== "http") {
+      if (data.github.trim().substring(0, 4) !== 'http') {
         userDetails.github = `http://${data.github.trim()}`
       } else userDetails.github = data.github
     }
   }
   if (data.website) {
     if (!isEmpty(data.website.trim())) {
-      if (data.website.trim().substring(0, 4) !== "http") {
+      if (data.website.trim().substring(0, 4) !== 'http') {
         userDetails.website = `http://${data.website.trim()}`
       } else userDetails.website = data.website
     }
   }
-  // if (!isEmpty(data.location.trim())) userDetails.location = data.location
 
-  if (data.cohort) userDetails.cohort = Number(data.cohort.replace(/\D/g, ""))
+  if (data.cohort)
+    userDetails.cohort = Number(data.cohort.toString().replace(/\D/g, ''))
 
   if (data.program) userDetails.program = data.program
 
@@ -99,12 +99,12 @@ exports.reduceUserDetails = data => {
 exports.validateUserDetails = data => {
   let errors = {}
   if (data.cohort > 100 || data.cohort < 0) {
-    errors.cohort = "Not a valid cohort"
+    errors.cohort = 'Not a valid cohort'
   }
   // Program validation
-  if (isEmpty(data.program)) errors.program = "Must not be empty"
-  if (!(data.program === "full stack" || data.program === "ux/ui")) {
-    errors.program = "Not a valid program"
+  if (isEmpty(data.program)) errors.program = 'Must not be empty'
+  if (!(data.program === 'full stack' || data.program === 'ux/ui')) {
+    errors.program = 'Not a valid program'
   }
   return {
     errors,
