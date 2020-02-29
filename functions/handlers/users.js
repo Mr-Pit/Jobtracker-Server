@@ -46,7 +46,7 @@ exports.signup = (req, res) => {
         cohort: Number(newUser.cohort),
         program: newUser.program,
         userId,
-        resume: ''
+        resumeUrl: ''
       }
       return db.doc(`/users/${userId}`).set(userCredentials)
     })
@@ -191,10 +191,10 @@ exports.uploadImage = (req, res) => {
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split('.')[filename.split('.').length - 1]
     // 32756238461724837.png
-    resumeFileName = `${Math.round(
+    imageFileName = `${Math.round(
       Math.random() * 1000000000000
     ).toString()}.${imageExtension}`
-    const filepath = path.join(os.tmpdir(), resumeFileName)
+    const filepath = path.join(os.tmpdir(), imageFileName)
     imageToBeUploaded = { filepath, mimetype }
     file.pipe(fs.createWriteStream(filepath))
   })
@@ -211,7 +211,7 @@ exports.uploadImage = (req, res) => {
         }
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${resumeFileName}?alt=media`
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
         return db.doc(`/users/${req.user.uid}`).update({ imageUrl })
       })
       .then(() => {
@@ -269,8 +269,8 @@ exports.uploadResume = (req, res) => {
         }
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${resumeFileName}?alt=media`
-        return db.doc(`/users/${req.user.uid}`).update({ resume })
+        const resumeUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${resumeFileName}?alt=media`
+        return db.doc(`/users/${req.user.uid}`).update({ resumeUrl })
       })
       .then(() => {
         return res.json({ message: 'resume uploaded successfully' })
