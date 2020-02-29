@@ -4,7 +4,13 @@ const app = require("express")()
 
 const FBAuth = require("./utility/fbAuth")
 
-const { getAllJobs, postOneJob, deleteJob, getJob } = require("./handlers/jobs")
+const {
+  getAllJobs,
+  postOneJob,
+  deleteJob,
+  getJob,
+  editOneJob
+} = require("./handlers/jobs")
 const {
   signup,
   login,
@@ -22,6 +28,7 @@ app.get("/jobs", getAllJobs)
 app.get("/job/:jobId", getJob)
 app.post("/job", FBAuth, postOneJob)
 app.delete("/job/:jobId", FBAuth, deleteJob)
+app.post("/job/:jobId", FBAuth, editOneJob)
 // todo delete job
 
 // users route

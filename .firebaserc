@@ -1,6 +1,7 @@
 {
   "projects": {
     "default": "jobtrackerback",
-    "jobtracker": "jobtracker-4f14f"
+    "jobtracker": "jobtracker-4f14f",
+    "JobTracker": "jobtracker-4f14f"
   }
 }

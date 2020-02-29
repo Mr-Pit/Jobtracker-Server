@@ -47,6 +47,38 @@ exports.postOneJob = (req, res) => {
     })
 }
 
+exports.editOneJob = (req, res) => {
+  const editJob = {
+    userId: req.user.uid,
+    createdAt: new Date().toISOString(),
+    company: req.body.company,
+    position: req.body.position,
+    status: req.body.status,
+    link: req.body.link
+  }
+  const document = db.doc(`/jobs/${req.params.jobId}`)
+  document
+    .get()
+    .then(doc => {
+      if (!doc.exists) {
+        return res.status(404).json({ error: "Job not found" })
+      }
+      if (doc.data().userId !== req.user.uid) {
+        return res.status(403).json({ error: "Unauthorized" })
+      } else {
+        return document.update(editJob)
+      }
+    })
+    .then(() => {
+      res.json({ message: "job updated successfully" })
+    })
+
+    .catch(err => {
+      res.status(500).json({ error: "something went wrong" })
+      console.error(err)
+    })
+}
+
 exports.deleteJob = (req, res) => {
   const document = db.doc(`/jobs/${req.params.jobId}`)
   document
