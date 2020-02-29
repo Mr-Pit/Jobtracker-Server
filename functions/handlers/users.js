@@ -45,7 +45,8 @@ exports.signup = (req, res) => {
         imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
         cohort: Number(newUser.cohort),
         program: newUser.program,
-        userId
+        userId,
+        resume: ''
       }
       return db.doc(`/users/${userId}`).set(userCredentials)
     })
@@ -175,8 +176,8 @@ exports.uploadImage = (req, res) => {
 
   const busboy = new BusBoy({ headers: req.headers })
 
-  let imageToBeUploaded = {}
-  let imageFileName
+  let resumeToBeUploaded = {}
+  let resumeFileName
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
@@ -189,31 +190,89 @@ exports.uploadImage = (req, res) => {
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split('.')[filename.split('.').length - 1]
     // 32756238461724837.png
-    imageFileName = `${Math.round(
+    resumeFileName = `${Math.round(
       Math.random() * 1000000000000
     ).toString()}.${imageExtension}`
-    const filepath = path.join(os.tmpdir(), imageFileName)
-    imageToBeUploaded = { filepath, mimetype }
+    const filepath = path.join(os.tmpdir(), resumeFileName)
+    resumeToBeUploaded = { filepath, mimetype }
     file.pipe(fs.createWriteStream(filepath))
   })
   busboy.on('finish', () => {
     admin
       .storage()
       .bucket(config.storageBucket)
-      .upload(imageToBeUploaded.filepath, {
+      .upload(resumeToBeUploaded.filepath, {
         resumable: false,
         metadata: {
           metadata: {
-            contentType: imageToBeUploaded.mimetype
+            contentType: resumeToBeUploaded.mimetype
           }
         }
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${resumeFileName}?alt=media`
         return db.doc(`/users/${req.user.uid}`).update({ imageUrl })
       })
       .then(() => {
         return res.json({ message: 'image uploaded successfully' })
+      })
+      .catch(err => {
+        console.error(err)
+        return res.status(500).json({ error: 'something went wrong' })
+      })
+  })
+  busboy.end(req.rawBody)
+}
+
+//Resume Upload
+
+exports.uploadImage = (req, res) => {
+  const BusBoy = require('busboy')
+  const path = require('path')
+  const os = require('os')
+  const fs = require('fs')
+
+  const busboy = new BusBoy({ headers: req.headers })
+
+  let resumeToBeUploaded = {}
+  let resumeFileName
+
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+    if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
+      return res.status(400).json({ error: 'wrong file type submitted' })
+    }
+    console.log(fieldname, file, filename, encoding, mimetype)
+    if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
+      return res.status(400).json({ error: 'Wrong file type submitted' })
+    }
+    // my.image.png => ['my', 'image', 'png']
+    const imageExtension = filename.split('.')[filename.split('.').length - 1]
+    // 32756238461724837.png
+    resumeFileName = `${Math.round(
+      Math.random() * 1000000000000
+    ).toString()}.${imageExtension}`
+    const filepath = path.join(os.tmpdir(), resumeFileName)
+    resumeToBeUploaded = { filepath, mimetype }
+    file.pipe(fs.createWriteStream(filepath))
+  })
+  busboy.on('finish', () => {
+    admin
+      .storage()
+      .bucket(config.storageBucket)
+      .upload(resumeToBeUploaded.filepath, {
+        resumable: false,
+        metadata: {
+          metadata: {
+            contentType: resumeToBeUploaded.mimetype
+          }
+        }
+      })
+      .then(() => {
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${resumeFileName}?alt=media`
+        return db.doc(`/users/${req.user.uid}`).update({ resume })
+      })
+      .then(() => {
+        return res.json({ message: 'resume uploaded successfully' })
       })
       .catch(err => {
         console.error(err)
