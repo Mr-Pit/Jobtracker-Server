@@ -39,7 +39,7 @@ exports.validateSignUpData = data => {
   }
   // Program validation
   if (isEmpty(data.program)) errors.program = 'Must not be empty'
-  if (!(data.program === 'full stack' || data.program === 'ux/ui')) {
+  if (!(data.program === 'Full Stack' || data.program === 'UX/UI')) {
     errors.program = 'Not a valid program'
   }
   return {
@@ -103,7 +103,7 @@ exports.validateUserDetails = data => {
   }
   // Program validation
   if (isEmpty(data.program)) errors.program = 'Must not be empty'
-  if (!(data.program === 'full stack' || data.program === 'ux/ui')) {
+  if (!(data.program === 'Full Stack' || data.program === 'UX/UI')) {
     errors.program = 'Not a valid program'
   }
   return {
