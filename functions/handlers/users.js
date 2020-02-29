@@ -182,11 +182,11 @@ exports.uploadImage = (req, res) => {
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
-      return res.status(400).json({ error: 'wrong file type submitted' })
+      return res.status(400).json({ error: `${mimetype} wrong file type submitted` })
     }
     console.log(fieldname, file, filename, encoding, mimetype)
     if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
-      return res.status(400).json({ error: 'Wrong file type submitted' })
+      return res.status(400).json({ error: `${mimetype} wrong file type submitted` })
     }
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split('.')[filename.split('.').length - 1]
@@ -239,12 +239,12 @@ exports.uploadResume = (req, res) => {
   let resumeFileName
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-    if (mimetype !== `application/pdf` && mimetype !== `application/pdf`) {
-      return res.status(400).json({ error: 'wrong file type submitted' })
+    if (mimetype !== `application/pdf` && mimetype !== `application/msword`) {
+      return res.status(400).json({ error: `${mimetype} wrong file type submitted` })
     }
     console.log(fieldname, file, filename, encoding, mimetype)
     if (mimetype !== 'application/msword' && mimetype !== 'application/msword') {
-      return res.status(400).json({ error: 'Wrong file type submitted' })
+      return res.status(400).json({ error: `${mimetype} wrong file type submitted` })
     }
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split('.')[filename.split('.').length - 1]

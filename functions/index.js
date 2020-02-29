@@ -18,7 +18,8 @@ const {
   addUserDetails,
   getAuthenticatedUser,
   getAllUsers,
-  getUserDetails
+  getUserDetails,
+  uploadResume
 } = require("./handlers/users")
 
 // Initialize Firebase
@@ -36,6 +37,7 @@ app.post("/signup", signup)
 app.post("/login", login)
 app.post("/user/image", FBAuth, uploadImage)
 app.post("/user", FBAuth, addUserDetails)
+app.post("/user/resume", FBAuth, uploadResume)
 app.get("/user", FBAuth, getAuthenticatedUser)
 app.get("/users", getAllUsers)
 app.get("/user/:userId", getUserDetails)
