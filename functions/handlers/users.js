@@ -168,6 +168,7 @@ exports.getAllUsers = (req, res) => {
     .catch(err => console.error(err))
 }
 
+//Image Upload
 exports.uploadImage = (req, res) => {
   const BusBoy = require('busboy')
   const path = require('path')
@@ -176,8 +177,8 @@ exports.uploadImage = (req, res) => {
 
   const busboy = new BusBoy({ headers: req.headers })
 
-  let resumeToBeUploaded = {}
-  let resumeFileName
+  let imageToBeUploaded = {}
+  let imageFileName
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
@@ -194,18 +195,18 @@ exports.uploadImage = (req, res) => {
       Math.random() * 1000000000000
     ).toString()}.${imageExtension}`
     const filepath = path.join(os.tmpdir(), resumeFileName)
-    resumeToBeUploaded = { filepath, mimetype }
+    imageToBeUploaded = { filepath, mimetype }
     file.pipe(fs.createWriteStream(filepath))
   })
   busboy.on('finish', () => {
     admin
       .storage()
       .bucket(config.storageBucket)
-      .upload(resumeToBeUploaded.filepath, {
+      .upload(imageToBeUploaded.filepath, {
         resumable: false,
         metadata: {
           metadata: {
-            contentType: resumeToBeUploaded.mimetype
+            contentType: imageToBeUploaded.mimetype
           }
         }
       })
@@ -226,7 +227,7 @@ exports.uploadImage = (req, res) => {
 
 //Resume Upload
 
-exports.uploadImage = (req, res) => {
+exports.uploadResume = (req, res) => {
   const BusBoy = require('busboy')
   const path = require('path')
   const os = require('os')
@@ -238,11 +239,11 @@ exports.uploadImage = (req, res) => {
   let resumeFileName
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-    if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
+    if (mimetype !== `application/pdf` && mimetype !== `application/pdf`) {
       return res.status(400).json({ error: 'wrong file type submitted' })
     }
     console.log(fieldname, file, filename, encoding, mimetype)
-    if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
+    if (mimetype !== 'application/msword' && mimetype !== 'application/msword') {
       return res.status(400).json({ error: 'Wrong file type submitted' })
     }
     // my.image.png => ['my', 'image', 'png']
