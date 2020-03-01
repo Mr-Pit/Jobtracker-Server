@@ -1,9 +1,9 @@
-const admin = require("firebase-admin")
+const admin = require('firebase-admin')
 
-var serviceAccount = require("../../functions/admin.json")
+var serviceAccount = require('../admin.json')
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://jobtrackerback.firebaseio.com"
+  databaseURL: 'https://jobtrackerback.firebaseio.com'
 })
 
 const db = admin.firestore()
