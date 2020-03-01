@@ -42,7 +42,7 @@ exports.postOneJob = (req, res) => {
     .then(doc => {
       const resJob = newJob
       resJob.jobId = doc.id
-      res.json(resJob)
+      res.json({ message: 'Job successfully added' })
     })
     .catch(err => {
       res.status(500).json({ error: 'something went wrong' })
@@ -73,11 +73,11 @@ exports.editOneJob = (req, res) => {
       }
     })
     .then(() => {
-      res.json({ message: 'job updated successfully' })
+      res.json({ message: 'Job updated successfully' })
     })
 
     .catch(err => {
-      res.status(500).json({ error: 'something went wrong' })
+      res.status(500).json({ error: 'Something went wrong' })
       console.error(err)
     })
 }
@@ -97,7 +97,7 @@ exports.deleteJob = (req, res) => {
       }
     })
     .then(() => {
-      res.json({ message: 'job deleted successfully' })
+      res.json({ message: 'Job deleted successfully' })
     })
     .catch(err => {
       console.error(err)
