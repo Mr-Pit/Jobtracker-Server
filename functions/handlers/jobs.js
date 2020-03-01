@@ -1,8 +1,10 @@
-const { db } = require("../utility/admin")
+const { db } = require('../utility/admin')
+
+const { reduceJobLink } = require('../utility/validators')
 
 exports.getAllJobs = (req, res) => {
-  db.collection("jobs")
-    .orderBy("createdAt", "desc")
+  db.collection('jobs')
+    .orderBy('createdAt', 'desc')
     .get()
     .then(data => {
       let jobs = []
@@ -25,16 +27,17 @@ exports.getAllJobs = (req, res) => {
 }
 
 exports.postOneJob = (req, res) => {
+  const jobLink = reduceJobLink(req.body.link)
   const newJob = {
     userId: req.user.uid,
     createdAt: new Date().toISOString(),
     company: req.body.company,
     position: req.body.position,
     status: req.body.status,
-    link: req.body.link
+    link: jobLink
   }
 
-  db.collection("jobs")
+  db.collection('jobs')
     .add(newJob)
     .then(doc => {
       const resJob = newJob
@@ -42,7 +45,7 @@ exports.postOneJob = (req, res) => {
       res.json(resJob)
     })
     .catch(err => {
-      res.status(500).json({ error: "something went wrong" })
+      res.status(500).json({ error: 'something went wrong' })
       console.error(err)
     })
 }
@@ -61,20 +64,20 @@ exports.editOneJob = (req, res) => {
     .get()
     .then(doc => {
       if (!doc.exists) {
-        return res.status(404).json({ error: "Job not found" })
+        return res.status(404).json({ error: 'Job not found' })
       }
       if (doc.data().userId !== req.user.uid) {
-        return res.status(403).json({ error: "Unauthorized" })
+        return res.status(403).json({ error: 'Unauthorized' })
       } else {
         return document.update(editJob)
       }
     })
     .then(() => {
-      res.json({ message: "job updated successfully" })
+      res.json({ message: 'job updated successfully' })
     })
 
     .catch(err => {
-      res.status(500).json({ error: "something went wrong" })
+      res.status(500).json({ error: 'something went wrong' })
       console.error(err)
     })
 }
@@ -85,16 +88,16 @@ exports.deleteJob = (req, res) => {
     .get()
     .then(doc => {
       if (!doc.exists) {
-        return res.status(404).json({ error: "Job not found" })
+        return res.status(404).json({ error: 'Job not found' })
       }
       if (doc.data().userId !== req.user.uid) {
-        return res.status(403).json({ error: "Unauthorized" })
+        return res.status(403).json({ error: 'Unauthorized' })
       } else {
         return document.delete()
       }
     })
     .then(() => {
-      res.json({ message: "job deleted successfully" })
+      res.json({ message: 'job deleted successfully' })
     })
     .catch(err => {
       console.error(err)

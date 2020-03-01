@@ -69,21 +69,21 @@ exports.reduceUserDetails = data => {
   if (data.linkedIn) {
     if (!isEmpty(data.linkedIn.trim())) {
       if (data.linkedIn.trim().substring(0, 4) !== 'http') {
-        userDetails.linkedIn = `http://${data.linkedIn.trim()}`
+        userDetails.linkedIn = `https://${data.linkedIn.trim()}`
       } else userDetails.linkedIn = data.linkedIn
     }
   }
   if (data.github) {
     if (!isEmpty(data.github.trim())) {
       if (data.github.trim().substring(0, 4) !== 'http') {
-        userDetails.github = `http://${data.github.trim()}`
+        userDetails.github = `https://${data.github.trim()}`
       } else userDetails.github = data.github
     }
   }
   if (data.website) {
     if (!isEmpty(data.website.trim())) {
       if (data.website.trim().substring(0, 4) !== 'http') {
-        userDetails.website = `http://${data.website.trim()}`
+        userDetails.website = `https://${data.website.trim()}`
       } else userDetails.website = data.website
     }
   }
@@ -94,6 +94,19 @@ exports.reduceUserDetails = data => {
   if (data.program) userDetails.program = data.program
 
   return userDetails
+}
+
+exports.reduceJobLink = link => {
+  let job
+
+  if (link) {
+    if (!isEmpty(link.trim())) {
+      if (link.trim().substring(0, 4) !== 'http') {
+        job = `https://${link.trim()}`
+      } else job = link
+    }
+  }
+  return job
 }
 
 exports.validateUserDetails = data => {

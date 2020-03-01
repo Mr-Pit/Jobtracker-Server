@@ -102,7 +102,6 @@ exports.login = (req, res) => {
 // user details
 exports.addUserDetails = (req, res) => {
   let userDetails = reduceUserDetails(req.body)
-  console.log(typeof req.body.cohort)
   const { valid, errors } = validateUserDetails(userDetails)
   if (!valid) return res.status(400).json(errors)
   db.doc(`/users/${req.user.uid}`)
@@ -182,11 +181,15 @@ exports.uploadImage = (req, res) => {
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
-      return res.status(400).json({ error: `${mimetype} is not an acceptable file type` })
+      return res
+        .status(400)
+        .json({ error: `${mimetype} is not an acceptable file type` })
     }
     console.log(fieldname, file, filename, encoding, mimetype)
     if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
-      return res.status(400).json({ error: `${mimetype} is not an acceptable file type` })
+      return res
+        .status(400)
+        .json({ error: `${mimetype} is not an acceptable file type` })
     }
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split('.')[filename.split('.').length - 1]
@@ -227,26 +230,28 @@ exports.uploadImage = (req, res) => {
 
 //Resume Upload
 exports.uploadResume = (req, res) => {
-  const BusBoy = require("busboy")
-  const path = require("path")
-  const os = require("os")
-  const fs = require("fs")
+  const BusBoy = require('busboy')
+  const path = require('path')
+  const os = require('os')
+  const fs = require('fs')
   const busboy = new BusBoy({ headers: req.headers })
 
   let resumeToBeUploaded = {}
   let resumeFileName
 
-  busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     console.log(fieldname, file, filename, encoding, mimetype)
     if (
       mimetype !==
-      `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
+        `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
       mimetype !== `application/pdf`
     ) {
-      return res.status(400).json({ error: `${mimetype} is not an acceptable file type` })
+      return res
+        .status(400)
+        .json({ error: `${mimetype} is not an acceptable file type` })
     }
     // my.image.png => ['my', 'image', 'png']
-    const imageExtension = filename.split(".")[filename.split(".").length - 1]
+    const imageExtension = filename.split('.')[filename.split('.').length - 1]
     // 32756238461724837.png
     resumeFileName = `${Math.round(
       Math.random() * 1000000000000
@@ -255,7 +260,7 @@ exports.uploadResume = (req, res) => {
     resumeToBeUploaded = { filepath, mimetype }
     file.pipe(fs.createWriteStream(filepath))
   })
-  busboy.on("finish", () => {
+  busboy.on('finish', () => {
     admin
       .storage()
       .bucket(config.storageBucket)
@@ -272,11 +277,11 @@ exports.uploadResume = (req, res) => {
         return db.doc(`/users/${req.user.uid}`).update({ resumeUrl })
       })
       .then(() => {
-        return res.json({ message: "resume uploaded successfully" })
+        return res.json({ message: 'resume uploaded successfully' })
       })
       .catch(err => {
         console.error(err)
-        return res.status(500).json({ error: "something went wrong" })
+        return res.status(500).json({ error: 'something went wrong' })
       })
   })
   busboy.end(req.rawBody)
