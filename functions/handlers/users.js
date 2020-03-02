@@ -181,16 +181,12 @@ exports.uploadImage = (req, res) => {
 
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
-      return res
-        .status(400)
-        .json({ error: `${mimetype} is not an acceptable file type` })
+      return res.status(400).json({ error: `Not an acceptable file type` })
     }
-    console.log(fieldname, file, filename, encoding, mimetype)
-    if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
-      return res
-        .status(400)
-        .json({ error: `${mimetype} is not an acceptable file type` })
-    }
+    // console.log(fieldname, file, filename, encoding, mimetype)
+    // if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
+    //   return res.status(400).json({ error: `Not an acceptable file type` })
+    // }
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split(".")[filename.split(".").length - 1]
     // 32756238461724837.png
@@ -246,9 +242,7 @@ exports.uploadResume = (req, res) => {
         `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
       mimetype !== `application/pdf`
     ) {
-      return res
-        .status(400)
-        .json({ error: `${mimetype} is not an acceptable file type` })
+      return res.status(400).json({ error: `Not an acceptable file type` })
     }
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split(".")[filename.split(".").length - 1]
