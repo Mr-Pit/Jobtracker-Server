@@ -191,6 +191,11 @@ exports.uploadImage = (req, res) => {
         .status(400)
         .json({ error: `${mimetype} is not an acceptable file type` })
     }
+    if (imageWidth > 500 || imageHeight > 500) {
+      return res
+        .status(400)
+        .json({ error: `${mimetype} Image exceeds maximum allowed dimensions (500px x 500px) [Upload Terminated].` })
+    }
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split(".")[filename.split(".").length - 1]
     // 32756238461724837.png
@@ -243,7 +248,7 @@ exports.uploadResume = (req, res) => {
     console.log(fieldname, file, filename, encoding, mimetype)
     if (
       mimetype !==
-        `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
+      `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
       mimetype !== `application/pdf`
     ) {
       return res
