@@ -173,6 +173,7 @@ exports.uploadImage = (req, res) => {
   const path = require('path')
   const os = require('os')
   const fs = require('fs')
+  var sizeOf = require('image-size');
 
   const busboy = new BusBoy({ headers: req.headers })
 
@@ -183,10 +184,7 @@ exports.uploadImage = (req, res) => {
     if (mimetype !== `image/jpeg` && mimetype !== `image/png`) {
       return res.status(400).json({ error: `Not an acceptable file type` })
     }
-    // console.log(fieldname, file, filename, encoding, mimetype)
-    // if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
-    //   return res.status(400).json({ error: `Not an acceptable file type` })
-    // }
+
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split('.')[filename.split('.').length - 1]
     // 32756238461724837.png
@@ -197,7 +195,19 @@ exports.uploadImage = (req, res) => {
     imageToBeUploaded = { filepath, mimetype }
     file.pipe(fs.createWriteStream(filepath))
   })
-  busboy.on('finish', () => {
+
+  busboy.on("finish", () => {
+
+    console.log(`Attempting to upload ${imageToBeUploaded.filepath}`)
+
+    const dimensions = sizeOf(imageToBeUploaded.filepath);
+
+    if (dimensions.width > 500 || dimensions.height > 500) {
+      return res
+        .status(400)
+        .json({ error: `Image exceeds maximum allowed dimensions (500px x 500px) [Upload Terminated].` })
+    }
+
     admin
       .storage()
       .bucket(config.storageBucket)
@@ -239,7 +249,7 @@ exports.uploadResume = (req, res) => {
     console.log(fieldname, file, filename, encoding, mimetype)
     if (
       mimetype !==
-        `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
+      `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
       mimetype !== `application/pdf`
     ) {
       return res.status(400).json({ error: `Not an acceptable file type` })
