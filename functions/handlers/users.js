@@ -173,6 +173,7 @@ exports.uploadImage = (req, res) => {
   const path = require("path")
   const os = require("os")
   const fs = require("fs")
+  var sizeOf = require('image-size');
 
   const busboy = new BusBoy({ headers: req.headers })
 
@@ -191,7 +192,11 @@ exports.uploadImage = (req, res) => {
         .status(400)
         .json({ error: `${mimetype} is not an acceptable file type` })
     }
-    if (imageWidth > 500 || imageHeight > 500) {
+    //The line of code below requires the full path to be passed in as an arguement. 
+    //Be sure Busboy is providing what it needs.  
+    var dimensions = sizeOf(filename);
+
+    if (dimensions.width > 500 || dimensions.height > 500) {
       return res
         .status(400)
         .json({ error: `${mimetype} Image exceeds maximum allowed dimensions (500px x 500px) [Upload Terminated].` })
