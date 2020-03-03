@@ -200,7 +200,7 @@ exports.uploadImage = (req, res) => {
 
     console.log(`Attempting to upload ${imageToBeUploaded.filepath}`)
 
-    var dimensions = sizeOf(imageToBeUploaded.filepath);
+    const dimensions = sizeOf(imageToBeUploaded.filepath);
 
     if (dimensions.width > 500 || dimensions.height > 500) {
       return res
