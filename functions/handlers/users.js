@@ -33,9 +33,7 @@ exports.signup = (req, res) => {
     .createUserWithEmailAndPassword(newUser.email, newUser.password)
     .then(data => {
       userId = data.user.uid
-      admin.auth().createCustomToken(data.user.uid, {
-        expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30
-      })
+      return data.user.getIdToken()
     })
     .then(idToken => {
       token = idToken
@@ -83,9 +81,7 @@ exports.login = (req, res) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then(data => {
-      admin.auth().createCustomToken(data.user.uid, {
-        expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30
-      })
+      return data.user.getIdToken()
     })
     .then(token => {
       return res.json({ token })
