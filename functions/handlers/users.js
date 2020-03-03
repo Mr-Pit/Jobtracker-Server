@@ -188,15 +188,6 @@ exports.uploadImage = (req, res) => {
     }
     console.log(fieldname, file, filename, encoding, mimetype)
 
-    //The line of code below requires the full path to be passed in as an arguement. 
-    //Be sure Busboy is providing precisely what it needs.  
-    var dimensions = sizeOf(filename);
-
-    if (dimensions.width > 500 || dimensions.height > 500) {
-      return res
-        .status(400)
-        .json({ error: `${filename} Image exceeds maximum allowed dimensions (500px x 500px) [Upload Terminated].` })
-    }
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split(".")[filename.split(".").length - 1]
     // 32756238461724837.png
@@ -208,6 +199,17 @@ exports.uploadImage = (req, res) => {
     file.pipe(fs.createWriteStream(filepath))
   })
   busboy.on("finish", () => {
+
+    console.log(`Attempting to upload ${imageToBeUploaded.filepath}`)
+
+    var dimensions = sizeOf(imageToBeUploaded.filepath);
+
+    if (dimensions.width > 500 || dimensions.height > 500) {
+      return res
+        .status(400)
+        .json({ error: `Image exceeds maximum allowed dimensions (500px x 500px) [Upload Terminated].` })
+    }
+
     admin
       .storage()
       .bucket(config.storageBucket)
