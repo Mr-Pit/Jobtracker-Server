@@ -173,7 +173,6 @@ exports.uploadImage = (req, res) => {
   const path = require("path")
   const os = require("os")
   const fs = require("fs")
-  var sizeOf = require("image-size")
 
   const busboy = new BusBoy({ headers: req.headers })
 
