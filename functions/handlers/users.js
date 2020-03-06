@@ -282,7 +282,7 @@ exports.uploadResume = (req, res) => {
 // Get any user's details
 exports.getUserDetails = (req, res) => {
   let userData = {}
-  db.doc(`/users/${req.params.userId}`)
+  db.doc(`/job/${req.params.userId}`)
     .get()
     .then(doc => {
       if (doc.exists) {
