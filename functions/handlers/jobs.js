@@ -1,10 +1,10 @@
-const { db } = require('../utility/admin')
+const { db } = require("../utility/admin")
 
-const { reduceJobLink } = require('../utility/validators')
+const { reduceJobLink } = require("../utility/validators")
 
 exports.getAllJobs = (req, res) => {
-  db.collection('jobs')
-    .orderBy('createdAt', 'desc')
+  db.collection("jobs")
+    .orderBy("createdAt", "desc")
     .get()
     .then(data => {
       let jobs = []
@@ -37,15 +37,15 @@ exports.postOneJob = (req, res) => {
     link: jobLink
   }
 
-  db.collection('jobs')
+  db.collection("jobs")
     .add(newJob)
     .then(doc => {
       const resJob = newJob
       resJob.jobId = doc.id
-      res.json({ message: 'Job successfully added' })
+      res.json({ message: "Job successfully added" })
     })
     .catch(err => {
-      res.status(500).json({ error: 'something went wrong' })
+      res.status(500).json({ error: "something went wrong" })
       console.error(err)
     })
 }
@@ -57,27 +57,35 @@ exports.editOneJob = (req, res) => {
     company: req.body.company,
     position: req.body.position,
     status: req.body.status,
-    link: req.body.link
+    link: req.body.link,
+    followUps: [
+      {
+        userId: req.user.uid,
+        createdAt: new Date().toISOString(),
+        followUp: req.body.followUp,
+        phoneFollow: req.body.phoneFollow
+      }
+    ]
   }
   const document = db.doc(`/jobs/${req.params.jobId}`)
   document
     .get()
     .then(doc => {
       if (!doc.exists) {
-        return res.status(404).json({ error: 'Job not found' })
+        return res.status(404).json({ error: "Job not found" })
       }
       if (doc.data().userId !== req.user.uid) {
-        return res.status(403).json({ error: 'Unauthorized' })
+        return res.status(403).json({ error: "Unauthorized" })
       } else {
         return document.update(editJob)
       }
     })
     .then(() => {
-      res.json({ message: 'Job updated successfully' })
+      res.json({ message: "Job updated successfully" })
     })
 
     .catch(err => {
-      res.status(500).json({ error: 'Something went wrong' })
+      res.status(500).json({ error: "Something went wrong" })
       console.error(err)
     })
 }
@@ -88,16 +96,16 @@ exports.deleteJob = (req, res) => {
     .get()
     .then(doc => {
       if (!doc.exists) {
-        return res.status(404).json({ error: 'Job not found' })
+        return res.status(404).json({ error: "Job not found" })
       }
       if (doc.data().userId !== req.user.uid) {
-        return res.status(403).json({ error: 'Unauthorized' })
+        return res.status(403).json({ error: "Unauthorized" })
       } else {
         return document.delete()
       }
     })
     .then(() => {
-      res.json({ message: 'Job deleted successfully' })
+      res.json({ message: "Job deleted successfully" })
     })
     .catch(err => {
       console.error(err)
@@ -114,6 +122,56 @@ exports.getJob = (req, res) => {
         jobData.jobPostDetails = doc.data()
         return res.json(jobData)
       }
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+}
+
+exports.postOneJobFollowUp = (req, res) => {
+  const followUp = {
+    jobId: req.body.jobId,
+    body: req.body.body,
+    type: req.body.type,
+    userId: req.user.uid,
+    createdAt: new Date().toISOString()
+  }
+
+  db.doc(`/jobs/${req.params.jobId}`)
+    .collection("followup")
+    .add(followUp)
+    .then(doc => {
+      const resJob = followUp
+      resJob.followupsId = doc.id
+      res.json({ message: "follow Up successfully added" })
+    })
+    .catch(err => {
+      res.status(500).json({ error: "something went wrong" })
+      console.error(err)
+    })
+}
+
+exports.getAuthenticatedUserFollowups = (req, res) => {
+  let jobData = {}
+  db.doc(`/jobs/${req.params.jobId}`)
+    .collection("followup")
+    .where("userId", "==", req.user.uid)
+    .orderBy("createdAt", "desc")
+    .get()
+
+    .then(data => {
+      jobData.followup = []
+      data.forEach(doc => {
+        jobData.followup.push({
+          jobId: doc.data().jobId,
+          userId: doc.data().userId,
+          body: doc.data().body,
+          type: doc.data().type,
+          createdAt: doc.data().createdAt
+        })
+      })
+      return res.json(jobData)
     })
     .catch(err => {
       console.error(err)
