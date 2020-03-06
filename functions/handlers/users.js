@@ -173,6 +173,7 @@ exports.uploadImage = (req, res) => {
   const path = require("path")
   const os = require("os")
   const fs = require("fs")
+  var Jimp = require('jimp')
 
   const busboy = new BusBoy({ headers: req.headers })
 
@@ -196,6 +197,15 @@ exports.uploadImage = (req, res) => {
   })
 
   busboy.on("finish", () => {
+
+    Jimp.read(imageToBeUploaded.filepath, (err, userimage) => {
+      if (err) throw err;
+      userimage
+        .resize(500, 500) // resize
+        .quality(80) // set JPEG quality
+        .write(imageToBeUploaded, filepath); // save
+    });
+
     admin
       .storage()
       .bucket(config.storageBucket)
@@ -237,7 +247,7 @@ exports.uploadResume = (req, res) => {
     console.log(fieldname, file, filename, encoding, mimetype)
     if (
       mimetype !==
-        `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
+      `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
       mimetype !== `application/pdf`
     ) {
       return res.status(400).json({ error: `Not an acceptable file type` })
