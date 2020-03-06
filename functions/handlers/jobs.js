@@ -57,15 +57,7 @@ exports.editOneJob = (req, res) => {
     company: req.body.company,
     position: req.body.position,
     status: req.body.status,
-    link: req.body.link,
-    followUps: [
-      {
-        userId: req.user.uid,
-        createdAt: new Date().toISOString(),
-        followUp: req.body.followUp,
-        phoneFollow: req.body.phoneFollow
-      }
-    ]
+    link: req.body.link
   }
   const document = db.doc(`/jobs/${req.params.jobId}`)
   document
