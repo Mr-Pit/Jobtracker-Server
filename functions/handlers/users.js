@@ -169,11 +169,11 @@ exports.getAllUsers = (req, res) => {
 
 //Image Upload
 exports.uploadImage = (req, res) => {
+  let oldImage
   const BusBoy = require('busboy')
   const path = require('path')
   const os = require('os')
   const fs = require('fs')
-  var sizeOf = require('image-size');
 
   const busboy = new BusBoy({ headers: req.headers })
 
@@ -196,18 +196,7 @@ exports.uploadImage = (req, res) => {
     file.pipe(fs.createWriteStream(filepath))
   })
 
-  busboy.on("finish", () => {
-
-    console.log(`Attempting to upload ${imageToBeUploaded.filepath}`)
-
-    const dimensions = sizeOf(imageToBeUploaded.filepath);
-
-    if (dimensions.width > 500 || dimensions.height > 500) {
-      return res
-        .status(400)
-        .json({ error: `Image exceeds maximum allowed dimensions (500px x 500px) [Upload Terminated].` })
-    }
-
+  busboy.on('finish', () => {
     admin
       .storage()
       .bucket(config.storageBucket)
@@ -220,11 +209,41 @@ exports.uploadImage = (req, res) => {
         }
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
-        return db.doc(`/users/${req.user.uid}`).update({ imageUrl })
-      })
-      .then(() => {
-        return res.json({ message: 'image uploaded successfully' })
+        let userData = {}
+        db.doc(`users/${req.user.uid}`)
+          .get()
+          .then(doc => {
+            if (doc.exists) {
+              userData.user = doc.data()
+              oldImage = userData.user.imageUrl
+                .split('/o/')[1]
+                .split('?alt=media')[0]
+              console.log({ oldImage })
+              console.log({ imageFileName })
+              if (oldImage !== 'no-img.png') {
+                admin
+                  .storage()
+                  .bucket(config.storageBucket)
+                  .file(oldImage)
+                  .delete(oldImage)
+                  .then(() => {
+                    console.log('Deleted old image successfully')
+                  })
+                  .catch(err => {
+                    console.log(err)
+                  })
+              }
+            } else {
+              return res.status(404).json({ errror: 'User not found' })
+            }
+          })
+          .then(() => {
+            const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
+            return db.doc(`/users/${req.user.uid}`).update({ imageUrl })
+          })
+          .then(() => {
+            return res.json({ message: 'image uploaded successfully' })
+          })
       })
       .catch(err => {
         console.error(err)
@@ -249,7 +268,7 @@ exports.uploadResume = (req, res) => {
     console.log(fieldname, file, filename, encoding, mimetype)
     if (
       mimetype !==
-      `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
+        `application/vnd.openxmlformats-officedocument.wordprocessingml.document` &&
       mimetype !== `application/pdf`
     ) {
       return res.status(400).json({ error: `Not an acceptable file type` })
