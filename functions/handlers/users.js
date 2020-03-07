@@ -170,10 +170,10 @@ exports.getAllUsers = (req, res) => {
 //Image Upload
 exports.uploadImage = (req, res) => {
   let oldImage
-  const BusBoy = require('busboy')
-  const path = require('path')
-  const os = require('os')
-  const fs = require('fs')
+  const BusBoy = require("busboy")
+  const path = require("path")
+  const os = require("os")
+  const fs = require("fs")
 
   const busboy = new BusBoy({ headers: req.headers })
 
@@ -216,25 +216,25 @@ exports.uploadImage = (req, res) => {
             if (doc.exists) {
               userData.user = doc.data()
               oldImage = userData.user.imageUrl
-                .split('/o/')[1]
-                .split('?alt=media')[0]
+                .split("/o/")[1]
+                .split("?alt=media")[0]
               console.log({ oldImage })
               console.log({ imageFileName })
-              if (oldImage !== 'no-img.png') {
+              if (oldImage !== "no-img.png") {
                 admin
                   .storage()
                   .bucket(config.storageBucket)
                   .file(oldImage)
                   .delete(oldImage)
                   .then(() => {
-                    console.log('Deleted old image successfully')
+                    console.log("Deleted old image successfully")
                   })
                   .catch(err => {
                     console.log(err)
                   })
               }
             } else {
-              return res.status(404).json({ errror: 'User not found' })
+              return res.status(404).json({ errror: "User not found" })
             }
           })
           .then(() => {
@@ -242,7 +242,7 @@ exports.uploadImage = (req, res) => {
             return db.doc(`/users/${req.user.uid}`).update({ imageUrl })
           })
           .then(() => {
-            return res.json({ message: 'image uploaded successfully' })
+            return res.json({ message: "image uploaded successfully" })
           })
       })
       .catch(err => {
@@ -313,7 +313,7 @@ exports.uploadResume = (req, res) => {
 // Get any user's details
 exports.getUserDetails = (req, res) => {
   let userData = {}
-  db.doc(`/job/${req.params.userId}`)
+  db.doc(`/users/${req.params.userId}`)
     .get()
     .then(doc => {
       if (doc.exists) {
