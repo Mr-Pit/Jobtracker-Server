@@ -169,6 +169,7 @@ exports.getAllUsers = (req, res) => {
 
 //Image Upload
 exports.uploadImage = (req, res) => {
+  let oldImage
   const BusBoy = require("busboy")
   const path = require("path")
   const os = require("os")
@@ -220,11 +221,41 @@ exports.uploadImage = (req, res) => {
         }
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
-        return db.doc(`/users/${req.user.uid}`).update({ imageUrl })
-      })
-      .then(() => {
-        return res.json({ message: "image uploaded successfully" })
+        let userData = {}
+        db.doc(`users/${req.user.uid}`)
+          .get()
+          .then(doc => {
+            if (doc.exists) {
+              userData.user = doc.data()
+              oldImage = userData.user.imageUrl
+                .split("/o/")[1]
+                .split("?alt=media")[0]
+              console.log({ oldImage })
+              console.log({ imageFileName })
+              if (oldImage !== "no-img.png") {
+                admin
+                  .storage()
+                  .bucket(config.storageBucket)
+                  .file(oldImage)
+                  .delete(oldImage)
+                  .then(() => {
+                    console.log("Deleted old image successfully")
+                  })
+                  .catch(err => {
+                    console.log(err)
+                  })
+              }
+            } else {
+              return res.status(404).json({ errror: "User not found" })
+            }
+          })
+          .then(() => {
+            const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
+            return db.doc(`/users/${req.user.uid}`).update({ imageUrl })
+          })
+          .then(() => {
+            return res.json({ message: "image uploaded successfully" })
+          })
       })
       .catch(err => {
         console.error(err)
