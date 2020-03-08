@@ -203,7 +203,9 @@ exports.uploadImage = (req, res) => {
       userimage
         .resize(500, 500) // resize
         .quality(80) // set JPEG quality
-        .write(imageToBeUploaded, filepath); // save
+        .write(imageToBeUploaded.filepath); // save
+
+      console.log("Image Resized to 500px x 500px")
     });
 
     admin
