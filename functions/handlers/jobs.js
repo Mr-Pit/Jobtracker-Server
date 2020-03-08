@@ -123,7 +123,6 @@ exports.getJob = (req, res) => {
 
 exports.postOneJobFollowUp = (req, res) => {
   const followUp = {
-    jobId: req.body.jobId,
     body: req.body.body,
     type: req.body.type,
     userId: req.user.uid,
@@ -156,11 +155,11 @@ exports.getAuthenticatedUserFollowups = (req, res) => {
       jobData.followup = []
       data.forEach(doc => {
         jobData.followup.push({
-          jobId: doc.data().jobId,
           userId: doc.data().userId,
           body: doc.data().body,
           type: doc.data().type,
-          createdAt: doc.data().createdAt
+          createdAt: doc.data().createdAt,
+          followUpId: doc.id
         })
       })
       return res.json(jobData)
