@@ -147,7 +147,6 @@ exports.getAuthenticatedUserFollowups = (req, res) => {
   let jobData = {}
   db.doc(`/jobs/${req.params.jobId}`)
     .collection("followup")
-    .where("userId", "==", req.user.uid)
     .orderBy("createdAt", "desc")
     .get()
 

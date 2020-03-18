@@ -33,7 +33,7 @@ app.post("/job", FBAuth, postOneJob)
 app.delete("/job/:jobId", FBAuth, deleteJob)
 app.post("/job/:jobId", FBAuth, editOneJob)
 app.post(`/jobs/:jobId/followups`, FBAuth, postOneJobFollowUp)
-app.get(`/jobs/:jobId/followups`, FBAuth, getAuthenticatedUserFollowups)
+app.get(`/jobs/:jobId/followups`, getAuthenticatedUserFollowups)
 // todo delete job
 
 // users route
